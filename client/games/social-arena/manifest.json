@@ -1,0 +1,47 @@
+{
+  "name": "Social Arena",
+  "icon": "⚔️",
+  "description": "พิมพ์ “สู้” เพื่อเข้าร่วมสนาม Like เพิ่มพลัง และ Gift มอบบัฟ",
+  "maxPlayers": 12,
+  "maxQueue": 30,
+  "maxHp": 100,
+  "roundSeconds": 180,
+  "countdownSeconds": 5,
+  "resultSeconds": 8,
+  "baseDamage": 9,
+  "attackCooldownMs": 1150,
+  "moveSpeed": 7.5,
+  "joinKeywords": [
+    "สู้",
+    "เข้าร่วม",
+    "join",
+    "fight"
+  ],
+  "gifts": {
+    "default": {
+      "heal": 8,
+      "shield": 5,
+      "boostMs": 0
+    },
+    "Rose": {
+      "heal": 15,
+      "shield": 0,
+      "boostMs": 0
+    },
+    "TikTok": {
+      "heal": 0,
+      "shield": 22,
+      "boostMs": 0
+    },
+    "Lion": {
+      "heal": 18,
+      "shield": 18,
+      "boostMs": 6500
+    },
+    "Universe": {
+      "heal": 35,
+      "shield": 35,
+      "boostMs": 11000
+    }
+  }
+}
