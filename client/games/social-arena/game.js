@@ -30,7 +30,7 @@
   .sa-feedline{display:block!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:2px 0}
   @media(max-width:850px){.sa-title{font-size:18px}.sa-state{display:none}.sa-field{left:2%;right:2%}.sa-footer{grid-template-columns:1fr 1fr}.sa-panel:first-child{grid-column:1/-1}.sa-stat{min-width:54px;padding:6px}.sa-banner{top:17%;min-width:0;width:80%}}
   `;
-  GameRegistry.socialArena = {
+  GameRegistry['social-arena'] = {
     settings:{}, players:null, queue:[], feed:[], phase:'waiting', round:0, participants:0,
     phaseEnds:0, roundEnds:0, lastTick:0, root:null, refs:null, tickTimer:null, uiTimer:null, timers:[],
     init(container, manifest) {
