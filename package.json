@@ -1,0 +1,38 @@
+{
+  "name": "tiktok-live-game-engine",
+  "version": "0.1.0",
+  "description": "Plug-and-play TikTok Live game overlay for OBS",
+  "main": "electron-main.js",
+  "scripts": {
+  "start": "electron .",
+  "start:server": "node run-server.js",
+  "dev": "electron . --dev",
+  "build": "electron-builder"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "tiktok-live-connector": "^2.5.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0",
+    "electron-updater": "^6.3.0"
+  },
+  "build": {
+    "appId": "com.yourname.tiktokgameengine",
+    "productName": "TikTok Live Game Engine",
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false
+    }
+  },
+  "allowScripts": {
+    "electron@33.4.11": true
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "boxing": {
+    "default": { "damage": 5, "effect": "punch" },
+    "Rose": { "damage": 3, "effect": "punch" },
+    "TikTok": { "damage": 10, "effect": "punch" },
+    "Lion": { "damage": 25, "effect": "superPunch" },
+    "Universe": { "damage": 50, "effect": "superPunch" }
+  },
+  "climbing": {
+    "default": { "climb": 2 },
+    "Rose": { "climb": 3 },
+    "TikTok": { "climb": 8 },
+    "Lion": { "climb": 20 },
+    "Universe": { "climb": 35 }
+  }
+}
