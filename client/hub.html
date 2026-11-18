@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>Live Game Hub</title>
+  <link rel="stylesheet" href="css/hub.css">
+</head>
+<body>
+  <h1>🎮 TikTok Live Game Hub</h1>
+
+  <div class="status-bar">
+    <span id="pillServer" class="pill bad">Server: ไม่เชื่อมต่อ</span>
+    <span id="pillOverlay" class="pill warn">Overlay: 0</span>
+    <span id="pillTikTok" class="pill">TikTok: -</span>
+    <span id="pillLive" class="pill">ยังไม่ Live</span>
+  </div>
+
+  <section>
+    <h2>1) เลือกเกม</h2>
+    <div id="games" class="games"></div>
+  </section>
+
+  <section>
+    <h2>2) ขึ้น Live</h2>
+    <div class="row">
+      <div>
+        <label>TikTok username (ไม่ต้องใส่ @) — เว้นว่าง = โหมดทดสอบ</label>
+        <input id="username" type="text" placeholder="เช่น myshop" style="width:260px;">
+      </div>
+    </div>
+    <button id="btnGo" class="live" onclick="goLive()">▶ ขึ้น Live</button>
+    <button id="btnStop" class="stop" onclick="cmd({command:'stopLive'})">■ หยุด Live</button>
+    <p class="hint">คนดูจะ interact ได้เฉพาะเกมที่ Live อยู่ตอนนี้ · กดเลือกเกมอื่นแล้วกด "สลับ" เพื่อเปลี่ยนเกมระหว่าง Live ได้</p>
+    <p id="tiktokMsg" class="hint"></p>
+  </section>
+
+  <section>
+    <h2>🧪 ทดสอบ (ส่งอีเวนต์จำลองเข้าเกมที่ Live อยู่)</h2>
+    <div class="row">
+      <div><label>ชื่อผู้ใช้</label><input id="mockUser" type="text" value="tester1" style="width:140px;"></div>
+      <div>
+        <label>ของขวัญ</label>
+        <select id="mockGift">
+          <option value="Rose">Rose (1💎)</option>
+          <option value="TikTok">TikTok (10💎)</option>
+          <option value="Lion">Lion (50💎)</option>
+          <option value="Universe">Universe (100💎)</option>
+          <option value="Galaxy">Galaxy — ไม่อยู่ในแมป (1000💎)</option>
+        </select>
+      </div>
+      <div><label>จำนวน</label><input id="mockCount" type="number" value="1" min="1" style="width:70px;"></div>
+      <button class="gift" onclick="sendGift()">🎁 ส่งของขวัญ</button>
+    </div>
+    <div class="row">
+      <div><label>ข้อความแชท</label><input id="mockChat" type="text" value="1" style="width:200px;"></div>
+      <button onclick="sendChat()">💬 ส่งแชท</button>
+      <button onclick="sendLike()">❤️ ส่งไลก์ x10</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>บันทึกอีเวนต์</h2>
+    <div id="log"></div>
+  </section>
+
+  <section>
+    <h2>OBS</h2>
+    <p>เพิ่ม <strong>Browser Source</strong> ใส่ URL:</p>
+    <code id="overlayUrl"></code>
+    <p class="hint">Size 1920 × 1080 · เปิด Hardware Acceleration · FPS 30 — เปิด overlay ไว้ครั้งเดียว เกมจะเปลี่ยนตามที่เลือกใน Hub เอง</p>
+    <button onclick="cmd({command:'resetLeaderboard'})">🔄 Reset Leaderboard</button>
+  </section>
+
+  <script>
+    const GIFT_DIAMONDS = { Rose: 1, TikTok: 10, Lion: 50, Universe: 100, Galaxy: 1000 };
+    let ws = null;
+    let S = { activeGame: null, games: [], tiktok: { status: 'idle' }, overlays: 0 };
+    let selected = null;
+
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+
+    $('overlayUrl').textContent = `${location.origin}/overlay.html`;
+    $('username').value = localStorage.getItem('tiktokUsername') || '';
+
+    function log(text) {
+      const d = document.createElement('div');
+      d.textContent = `${new Date().toLocaleTimeString()}  ${text}`;
+      $('log').prepend(d);
+      while ($('log').children.length > 60) $('log').lastChild.remove();
+    }
+
+    function connect() {
+      ws = new WebSocket(`ws://${location.host}`);
+      ws.onopen = () => {
+        ws.send(JSON.stringify({ command: 'hello', role: 'hub' }));
+        pill('pillServer', 'Server: เชื่อมต่อแล้ว', 'ok');
+      };
+      ws.onclose = () => {
+        pill('pillServer', 'Server: หลุด — กำลังต่อใหม่...', 'bad');
+        setTimeout(connect, 2000);
+      };
+      ws.onmessage = (e) => {
+        let d; try { d = JSON.parse(e.data); } catch { return; }
+        if (d.event === 'state') { S = d; render(); }
+        else if (d.event === 'notice') log(d.message);
+        else if (d.event === 'game_event') {
+          const who = d.name || d.userId;
+          if (d.type === 'gift') log(`🎁 ${who} → ${d.giftName} x${d.count} (${d.diamonds}💎)${d.test ? ' [ทดสอบ]' : ''}`);
+          if (d.type === 'chat') log(`💬 ${who}: ${d.comment}`);
+          if (d.type === 'like') log(`❤️ ${who} x${d.count}`);
+        }
+      };
+    }
+    connect();
+
+    function cmd(payload) {
+      if (!ws || ws.readyState !== WebSocket.OPEN) { alert('ยังไม่เชื่อมต่อ server — รอสักครู่'); return; }
+      ws.send(JSON.stringify(payload));
+    }
+
+    function pill(id, text, cls) { const el = $(id); el.textContent = text; el.className = 'pill ' + (cls || ''); }
+
+    function render() {
+      if (!selected || !S.games.some(g => g.id === selected)) selected = S.activeGame || (S.games[0] && S.games[0].id) || null;
+
+      $('games').innerHTML = S.games.map(g => `
+        <div class="game-card ${g.id === selected ? 'selected' : ''} ${g.id === S.activeGame ? 'live' : ''}"
+             onclick="selectGame('${esc(g.id)}')">
+          ${g.id === S.activeGame ? '<span class="badge">🔴 LIVE</span>' : ''}
+          <div class="icon">${esc(g.icon)}</div>
+          <div class="name">${esc(g.name)}</div>
+          <div class="desc">${esc(g.description)}</div>
+        </div>`).join('') || '<p class="hint">ไม่พบเกมในโฟลเดอร์ client/games</p>';
+
+      pill('pillOverlay', `Overlay: ${S.overlays} หน้าต่าง`, S.overlays > 0 ? 'ok' : 'warn');
+
+      const t = S.tiktok || {};
+      const tmap = { idle: ['TikTok: โหมดทดสอบ / ไม่เชื่อมต่อ', ''], connecting: ['TikTok: กำลังเชื่อมต่อ...', 'warn'],
+                     connected: [`TikTok: เชื่อมต่อ @${t.username}`, 'ok'], error: ['TikTok: ผิดพลาด', 'bad'] };
+      pill('pillTikTok', ...(tmap[t.status] || tmap.idle));
+      $('tiktokMsg').textContent = t.status === 'error' ? `⚠️ ${t.message}` : (t.message || '');
+
+      const live = S.games.find(g => g.id === S.activeGame);
+      pill('pillLive', live ? `🔴 LIVE: ${live.name}` : 'ยังไม่ Live', live ? 'bad' : '');
+
+      const same = selected === S.activeGame;
+      $('btnGo').textContent = !S.activeGame ? '▶ ขึ้น Live' : (same ? '🔴 กำลัง Live อยู่' : '🔄 สลับไปเกมนี้');
+      $('btnGo').disabled = !selected || (same && S.activeGame);
+      $('btnStop').disabled = !S.activeGame;
+    }
+
+    function selectGame(id) { selected = id; render(); }
+
+    function goLive() {
+      const username = $('username').value.trim();
+      localStorage.setItem('tiktokUsername', username);
+      cmd({ command: 'goLive', gameId: selected, username });
+    }
+
+    const user = () => $('mockUser').value.trim() || 'tester';
+    function sendGift() {
+      const giftName = $('mockGift').value;
+      cmd({ command: 'simulate', type: 'gift', userId: user(), giftName,
+            diamonds: GIFT_DIAMONDS[giftName] || 1, count: Number($('mockCount').value) || 1 });
+    }
+    function sendChat() { cmd({ command: 'simulate', type: 'chat', userId: user(), comment: $('mockChat').value }); }
+    function sendLike() { cmd({ command: 'simulate', type: 'like', userId: user(), count: 10 }); }
+  </script>
+</body>
+</html>

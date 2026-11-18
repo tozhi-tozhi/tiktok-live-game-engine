@@ -4,10 +4,10 @@
   "description": "Plug-and-play TikTok Live game overlay for OBS",
   "main": "electron-main.js",
   "scripts": {
-  "start": "electron .",
-  "start:server": "node run-server.js",
-  "dev": "electron . --dev",
-  "build": "electron-builder"
+    "start": "electron .",
+    "start:server": "node run-server.js",
+    "dev": "electron . --dev",
+    "build": "electron-builder"
   },
   "engines": {
     "node": ">=20"
@@ -17,7 +17,7 @@
     "ws": "^8.18.0"
   },
   "devDependencies": {
-    "electron": "^33.0.0",
+    "electron": "^33.4.11",
     "electron-builder": "^25.0.0",
     "electron-updater": "^6.3.0"
   },

@@ -1,9 +1,6 @@
 module.exports = {
-  httpPort: 3000,
-  wsPort: 8080,
-  tiktokUsername: 'YOUR_USERNAME',
-  signApiKey: '',
-  defaultMode: 'boxing',
+  port: 3000,            // ใช้พอร์ตเดียวทั้งเว็บและ WebSocket
+  signApiKey: '',        // (ไม่บังคับ) Euler Stream API key
   leaderboardSize: 10,
   leaderboardResetHours: 6
 };

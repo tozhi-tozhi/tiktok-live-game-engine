@@ -1,0 +1,13 @@
+{
+  "name": "Climbing Race",
+  "icon": "🧗",
+  "description": "ใครส่งของขวัญจะได้เลนของตัวเอง ยิ่งส่งยิ่งปีนสูง คนแรกถึงยอดชนะ",
+  "maxLanes": 5,
+  "gifts": {
+    "default":  { "climb": 2 },
+    "Rose":     { "climb": 3 },
+    "TikTok":   { "climb": 8 },
+    "Lion":     { "climb": 20 },
+    "Universe": { "climb": 35 }
+  }
+}

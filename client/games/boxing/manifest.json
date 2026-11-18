@@ -1,0 +1,13 @@
+{
+  "name": "Boxing Battle",
+  "icon": "🥊",
+  "description": "Robot vs Dino — คนดูพิมพ์ 1 หรือ 2 เพื่อเลือกทีม แล้วส่งของขวัญเพื่อต่อยอีกฝั่ง",
+  "maxHp": 100,
+  "gifts": {
+    "default":  { "damage": 5 },
+    "Rose":     { "damage": 3 },
+    "TikTok":   { "damage": 10 },
+    "Lion":     { "damage": 25 },
+    "Universe": { "damage": 50 }
+  }
+}
